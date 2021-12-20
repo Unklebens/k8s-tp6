@@ -21,4 +21,4 @@ spec:
         - name: web1
           image: nginx:1.21.3
           ports:
-            - containerPort: 8080
+            - containerPort: 80
