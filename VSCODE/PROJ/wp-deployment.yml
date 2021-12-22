@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: wordpress-deployment
+  labels: 
+    app: wordpress
+spec:
+  replicas: 2
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector: 
+    matchLabels: 
+      app: wordpress
+  template:
+    metadata:
+      name: wordpress
+      labels:
+        app: wordpress
+    spec:
+      containers:
+       - name: wordpress-pod
+         image: wordpress
+         ports:
+          - containerPort: 80
+         env: 
+          - name: WORDPRESS_DB_HOST
+            value: mysql-svc
+          - name: WORDPRESS_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: mysql_user
+          - name: WORDPRESS_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: mysql_pwd
+          - name: WORDPRESS_DB_NAME
+            value: wordpress-db
+  #lien du volume à utiliser pour cet hote
+         volumeMounts:
+          - mountPath: /var/www/html
+            name: data-volume
+  #creation du volume        
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim: 
+            claimName: wp-pvc
